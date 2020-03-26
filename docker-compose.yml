@@ -5,19 +5,11 @@ services:
         ports:
             - "5672:5672"
         restart: on-failure
-    message_queue:
-        build: .
-        command: python aiohttp_test/message_queue_worker.py
-        depends_on:
-            - rabbitmq
-        restart: on-failure
-        deploy:
-            replicas: 2
     api_server:
         build: .
         command: python aiohttp_test/api_server_worker.py --sites 2
         depends_on:
-            - message_queue
+            - rabbitmq
         ports:
             - "8081:8081"
             - "8082:8082"
@@ -28,3 +20,12 @@ services:
         ports:
             - "8181:8181"
         restart: on-failure
+    message_queue:
+        build: .
+        command: python aiohttp_test/message_queue_worker.py
+        depends_on:
+            - rabbitmq
+            - socket_server  # temporary but it's not good
+        restart: on-failure
+        deploy:
+            replicas: 2
